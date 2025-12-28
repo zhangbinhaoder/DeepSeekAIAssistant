@@ -18,6 +18,8 @@ import java.util.concurrent.CopyOnWriteArrayList
  * 视觉感知模块
  * 负责截图、OCR文字识别、图像识别、UI元素定位
  * 支持 Root 和非 Root 两种模式
+ * 
+ * 性能优化: 支持 NEON SIMD 加速的 Native 层颜色检测
  */
 class ScreenVision(private val context: Context) {
     
@@ -29,6 +31,19 @@ class ScreenVision(private val context: Context) {
         
         // 颜色识别阈值
         private const val COLOR_SIMILARITY_THRESHOLD = 30
+        
+        // 是否使用 Native 加速
+        private var useNativeAcceleration = false
+        
+        init {
+            // 检查 Native 库是否可用
+            useNativeAcceleration = try {
+                NativeAgentCore.load()
+                NativeAgentCore.isAvailable() && NativeAgentCore.hasSimdSupport()
+            } catch (e: Exception) {
+                false
+            }
+        }
     }
     
     private val rootManager = RootManager.getInstance(context)
@@ -372,10 +387,58 @@ class ScreenVision(private val context: Context) {
     /**
      * 识别血条（游戏专用）
      * 红色 = 敌方，蓝色/绿色 = 己方
+     * 
+     * 性能优化: 使用 NEON SIMD 加速
      */
     fun detectHealthBars(bitmap: Bitmap): List<ImageRecognitionResult> {
         val results = mutableListOf<ImageRecognitionResult>()
         
+        // 尝试使用 Native 加速
+        if (useNativeAcceleration) {
+            try {
+                val argbPixels = bitmapToArgbBytes(bitmap)
+                if (argbPixels != null) {
+                    // 检测红色血条 (敌方)
+                    val enemies = SimdImageEngine.detectEnemyHealthBars(
+                        argbPixels, bitmap.width, bitmap.height
+                    )
+                    enemies.forEach { elem ->
+                        if (elem.width > elem.height * 2) {
+                            results.add(ImageRecognitionResult(
+                                label = "enemy_health_bar",
+                                bounds = Rect(elem.x, elem.y, elem.x + elem.width, elem.y + elem.height),
+                                confidence = elem.confidence,
+                                color = Color.RED,
+                                additionalInfo = mapOf("team" to "enemy")
+                            ))
+                        }
+                    }
+                    
+                    // 检测绿色血条 (己方)
+                    val selfBar = SimdImageEngine.detectSelfHealthBar(
+                        argbPixels, bitmap.width, bitmap.height
+                    )
+                    if (selfBar != null && selfBar.width > selfBar.height * 2) {
+                        results.add(ImageRecognitionResult(
+                            label = "ally_health_bar",
+                            bounds = Rect(selfBar.x, selfBar.y, selfBar.x + selfBar.width, selfBar.y + selfBar.height),
+                            confidence = selfBar.confidence,
+                            color = Color.GREEN,
+                            additionalInfo = mapOf("team" to "ally")
+                        ))
+                    }
+                    
+                    if (results.isNotEmpty()) {
+                        Log.d(TAG, "Native 检测到 ${results.size} 个血条")
+                        return results
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Native 血条检测失败，回退到 Kotlin 实现: ${e.message}")
+            }
+        }
+        
+        // Kotlin 实现回退
         // 红色血条（敌方）
         val redRegions = findColorRegions(bitmap, Color.RED, 50)
         redRegions.forEach { region ->
@@ -399,6 +462,31 @@ class ScreenVision(private val context: Context) {
         }
         
         return results
+    }
+    
+    /**
+     * Bitmap 转 ARGB 字节数组 (Native 层需要)
+     */
+    private fun bitmapToArgbBytes(bitmap: Bitmap): ByteArray? {
+        return try {
+            val width = bitmap.width
+            val height = bitmap.height
+            val pixels = IntArray(width * height)
+            bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+            
+            val bytes = ByteArray(pixels.size * 4)
+            for (i in pixels.indices) {
+                val pixel = pixels[i]
+                bytes[i * 4] = (pixel shr 24).toByte() // A
+                bytes[i * 4 + 1] = (pixel shr 16).toByte() // R
+                bytes[i * 4 + 2] = (pixel shr 8).toByte() // G
+                bytes[i * 4 + 3] = pixel.toByte() // B
+            }
+            bytes
+        } catch (e: Exception) {
+            Log.e(TAG, "Bitmap 转换失败: ${e.message}")
+            null
+        }
     }
     
     /**

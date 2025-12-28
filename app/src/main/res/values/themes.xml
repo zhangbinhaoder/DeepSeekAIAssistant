@@ -137,4 +137,31 @@
         <item name="backgroundTint">@color/genshin_cryo</item>
         <item name="cornerRadius">12dp</item>
     </style>
+    
+    <!-- ============================================ -->
+    <!-- Linux 终端风格启动主题 -->
+    <!-- ============================================ -->
+    <style name="Theme.Splash" parent="Theme.Material3.Dark.NoActionBar">
+        <!-- 纯黑背景 -->
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:colorBackground">@android:color/black</item>
+        <item name="colorSurface">@android:color/black</item>
+        
+        <!-- 全屏模式 -->
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        
+        <!-- 黑色状态栏和导航栏 -->
+        <item name="android:statusBarColor">@android:color/black</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
+        <item name="android:windowLightStatusBar">false</item>
+        
+        <!-- 终端绿色文字 -->
+        <item name="android:textColorPrimary">#00FF00</item>
+        <item name="android:textColorSecondary">#00CC00</item>
+        
+        <!-- 无动画，立即显示 -->
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
 </resources>

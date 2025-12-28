@@ -21,6 +21,7 @@ import com.example.deepseekaiassistant.tools.SceneTools
 import com.example.deepseekaiassistant.agent.GameAIAgent
 import com.example.deepseekaiassistant.agent.MultiSceneAIAgent
 import com.example.deepseekaiassistant.agent.OperationType
+import com.example.deepseekaiassistant.kernel.KernelOptimize
 import java.io.File
 
 /**
@@ -70,6 +71,7 @@ class SceneFragment : Fragment() {
         setupModuleManagement()
         setupAIControlPermission()
         setupAIAgent()
+        setupKernelOptimize()
         checkRootStatus()
         loadSystemInfo()
     }
@@ -209,6 +211,127 @@ class SceneFragment : Fragment() {
             if (success) "动画缩放已设置为 ${scale}x" else "设置失败（需要 ROOT 权限）",
             Toast.LENGTH_SHORT
         ).show()
+    }
+    
+    // ==================== 内核直连优化 ====================
+    
+    private fun setupKernelOptimize() {
+        // 初始化内核优化模块
+        KernelOptimize.init(requireContext())
+        
+        // 恢复开关状态
+        val savedState = KernelOptimize.getSavedEnabledState(requireContext())
+        binding.switchKernelOptimize.isChecked = savedState
+        
+        // 更新状态显示
+        updateKernelOptimizeStatus()
+        
+        // 开关监听
+        binding.switchKernelOptimize.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                enableKernelOptimize()
+            } else {
+                disableKernelOptimize()
+            }
+        }
+        
+        // 如果已启用，开始温度监控
+        if (savedState && KernelOptimize.isLoaded()) {
+            startTemperatureMonitor()
+        }
+    }
+    
+    private fun enableKernelOptimize() {
+        if (!sceneTools.checkRootAccess()) {
+            Toast.makeText(requireContext(), "需要 ROOT 权限才能启用内核优化", Toast.LENGTH_SHORT).show()
+            binding.switchKernelOptimize.isChecked = false
+            return
+        }
+        
+        if (!KernelOptimize.isLoaded()) {
+            Toast.makeText(requireContext(), "内核优化模块未加载", Toast.LENGTH_SHORT).show()
+            binding.switchKernelOptimize.isChecked = false
+            return
+        }
+        
+        val success = KernelOptimize.enableOptimization()
+        if (success) {
+            KernelOptimize.saveEnabledState(requireContext(), true)
+            Toast.makeText(requireContext(), "⚡ 内核直连优化已启用", Toast.LENGTH_SHORT).show()
+            startTemperatureMonitor()
+        } else {
+            Toast.makeText(requireContext(), "启用失败，可能缺少 Root 权限", Toast.LENGTH_SHORT).show()
+            binding.switchKernelOptimize.isChecked = false
+        }
+        
+        updateKernelOptimizeStatus()
+    }
+    
+    private fun disableKernelOptimize() {
+        KernelOptimize.disableOptimization()
+        KernelOptimize.saveEnabledState(requireContext(), false)
+        KernelOptimize.stopTemperatureMonitor()
+        
+        // 清空温度显示
+        binding.tvKernelCpuTemp.text = "--°C"
+        binding.tvKernelBatteryTemp.text = "--°C"
+        binding.tvKernelGpuTemp.text = "--°C"
+        
+        Toast.makeText(requireContext(), "内核优化已禁用", Toast.LENGTH_SHORT).show()
+        updateKernelOptimizeStatus()
+    }
+    
+    private fun updateKernelOptimizeStatus() {
+        val status = KernelOptimize.getOptimizeStatus()
+        val priorityInfo = KernelOptimize.getPriorityInfo()
+        
+        binding.tvKernelOptimizeStatus.text = if (status?.isEnabled == true) {
+            buildString {
+                append("✅ 已启用")
+                if (priorityInfo != null) {
+                    append(" | PID: ${priorityInfo.pid}")
+                    append(" | Nice: ${priorityInfo.nice}")
+                }
+            }
+        } else {
+            "状态: 未启用"
+        }
+    }
+    
+    private fun startTemperatureMonitor() {
+        KernelOptimize.startTemperatureMonitor(2000) { cpu, battery, gpu ->
+            // 更新 CPU 温度
+            binding.tvKernelCpuTemp.text = if (cpu > 0) "${cpu}°C" else "--°C"
+            binding.tvKernelCpuTemp.setTextColor(getTempColor(cpu))
+            
+            // 更新电池温度
+            binding.tvKernelBatteryTemp.text = if (battery > 0) "${battery}°C" else "--°C"
+            binding.tvKernelBatteryTemp.setTextColor(getBatteryTempColor(battery))
+            
+            // 更新 GPU 温度
+            binding.tvKernelGpuTemp.text = if (gpu > 0) "${gpu}°C" else "--°C"
+            binding.tvKernelGpuTemp.setTextColor(getTempColor(gpu))
+        }
+    }
+    
+    private fun getTempColor(temp: Int): Int {
+        return when {
+            temp < 0 -> 0xFF9E9E9E.toInt()  // 灰色 (无数据)
+            temp < 50 -> 0xFF4CAF50.toInt() // 绿色 (正常)
+            temp < 65 -> 0xFFFF9800.toInt() // 橙色 (偏高)
+            temp < 80 -> 0xFFFF5722.toInt() // 深橙 (过热)
+            else -> 0xFFF44336.toInt()      // 红色 (危险)
+        }
+    }
+    
+    private fun getBatteryTempColor(temp: Int): Int {
+        return when {
+            temp < 0 -> 0xFF9E9E9E.toInt()  // 灰色 (无数据)
+            temp < 35 -> 0xFF2196F3.toInt() // 蓝色 (正常)
+            temp < 40 -> 0xFFFF9800.toInt() // 橙色 (偏高)
+            temp < 45 -> 0xFFFF5722.toInt() // 深橙 (过热)
+            else -> 0xFFF44336.toInt()      // 红色 (危险)
+        }
     }
     
     // ==================== 本地 AI 模型管理 ====================
@@ -896,6 +1019,8 @@ class SceneFragment : Fragment() {
     
     override fun onDestroyView() {
         super.onDestroyView()
+        // 停止温度监控
+        KernelOptimize.stopTemperatureMonitor()
         // 释放 AI 代理资源
         if (::gameAIAgent.isInitialized) {
             gameAIAgent.release()

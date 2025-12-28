@@ -1,21 +1,17 @@
 # ==============================================================================
-# CMakeLists.txt - llama.cpp Android 集成
+# CMakeLists.txt - llama.cpp Android 集成 + Agent Core 高性能模块
 # ==============================================================================
 # 
 # 功能：
 # 1. 检测并编译 llama.cpp 源码
 # 2. 创建 JNI 绑定库 (llama_android)
-# 3. 处理模拟模式（llama.cpp 不可用时）
-#
-# 使用方法：
-# 1. 运行 setup_llama.bat 下载 llama.cpp 源码
-# 2. 将项目放在纯英文路径
-# 3. 执行 Gradle 构建
+# 3. 创建高性能 Agent Core 库 (agent_native)
+# 4. 处理模拟模式（llama.cpp 不可用时）
 #
 # ==============================================================================
 
 cmake_minimum_required(VERSION 3.22.1)
-project(llama_android VERSION 1.0.0 LANGUAGES CXX)
+project(llama_android VERSION 1.0.0 LANGUAGES C CXX)
 
 # ==============================================================================
 # 编译器设置
@@ -151,3 +147,151 @@ message(STATUS "  - Build Type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "  - llama.cpp Available: ${LLAMA_AVAILABLE}")
 message(STATUS "  - Target ABI: ${CMAKE_ANDROID_ARCH_ABI}")
 message(STATUS "======================================")
+
+# ==============================================================================
+# Agent Core 高性能库 - SIMD/触控注入/高精度定时/二进制优化
+# ==============================================================================
+
+message(STATUS "Configuring Agent Core native library...")
+
+# C 标准
+add_library(agent_native SHARED
+    simd_image.c
+    touch_inject.c
+    precision_timer.c
+    screen_memory.c
+    agent_jni.c
+    branchless_optim.c
+    benchmark.c
+    kernel_optimize.c
+)
+
+# 包含二进制优化头文件目录
+target_include_directories(agent_native PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+# 添加 ARM64 汇编文件 (只对 arm64-v8a 架构)
+if(CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a")
+    # 启用汇编语言
+    enable_language(ASM)
+    
+    # 添加汇编源文件
+    target_sources(agent_native PRIVATE
+        asm_core.S
+        kernel_syscall.S
+    )
+    
+    # 汇编编译选项
+    set_source_files_properties(asm_core.S PROPERTIES
+        LANGUAGE ASM
+        COMPILE_FLAGS "-x assembler-with-cpp"
+    )
+    
+    message(STATUS "  - ARM64 Assembly enabled for arm64-v8a")
+endif()
+
+# 启用 NEON SIMD (ARM)
+# 注意: arm64-v8a 默认启用 NEON，不需要 -mfpu 标志
+# armeabi-v7a 需要显式启用 -mfpu=neon
+if(CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a")
+    target_compile_definitions(agent_native PRIVATE HAS_NEON=1)
+    message(STATUS "  - NEON SIMD enabled for arm64-v8a (native)")
+elseif(CMAKE_ANDROID_ARCH_ABI STREQUAL "armeabi-v7a")
+    target_compile_options(agent_native PRIVATE -mfpu=neon)
+    target_compile_definitions(agent_native PRIVATE HAS_NEON=1)
+    message(STATUS "  - NEON SIMD enabled for armeabi-v7a")
+else()
+    message(STATUS "  - NEON SIMD not available for ${CMAKE_ANDROID_ARCH_ABI}")
+endif()
+
+# ==============================================================================
+# 二进制级优化配置
+# ==============================================================================
+
+# 基础优化标志
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    target_compile_options(agent_native PRIVATE
+        # 最高优化级别
+        -O3
+        # 快速数学运算（牺牲IEEE精度换取速度）
+        -ffast-math
+        # 循环展开
+        -funroll-loops
+        # 向量化
+        -ftree-vectorize
+        # 函数内联阈值提高
+        -finline-limit=1000
+        # 严格别名（允许更多优化）
+        -fstrict-aliasing
+        # 消除未使用代码
+        -ffunction-sections
+        -fdata-sections
+        # 优化尾调用
+        -foptimize-sibling-calls
+    )
+    
+    # 链接时优化 (LTO)
+    target_compile_options(agent_native PRIVATE -flto=thin)
+    target_link_options(agent_native PRIVATE -flto=thin)
+    
+    # 消除未使用的段
+    target_link_options(agent_native PRIVATE -Wl,--gc-sections)
+    
+    message(STATUS "  - Binary-level optimizations enabled")
+    message(STATUS "    * LTO (Link-Time Optimization)")
+    message(STATUS "    * Aggressive inlining")
+    message(STATUS "    * Auto-vectorization")
+endif()
+
+# ==============================================================================
+# PGO (Profile-Guided Optimization) 支持
+# ==============================================================================
+# 
+# PGO 分两阶段:
+# 1. 生成阶段: 编译带插桩的代码，运行收集性能数据
+# 2. 使用阶段: 用性能数据重新编译，优化热点路径
+#
+# 使用方法:
+# 阶段1 - 生成 profile:
+#   cmake -DPGO_GENERATE=ON ..
+#   adb push app.apk /data/local/tmp/
+#   adb shell run-as <package> <运行测试>
+#   adb pull /data/data/<package>/profile.profraw .
+#   llvm-profdata merge -output=profile.profdata profile.profraw
+#
+# 阶段2 - 使用 profile:
+#   cmake -DPGO_USE=ON -DPGO_PROFILE_PATH=/path/to/profile.profdata ..
+# ==============================================================================
+
+option(PGO_GENERATE "Generate PGO profile data" OFF)
+option(PGO_USE "Use PGO profile data for optimization" OFF)
+set(PGO_PROFILE_PATH "" CACHE PATH "Path to .profdata file for PGO")
+
+if(PGO_GENERATE)
+    message(STATUS "  - PGO: Profile generation mode enabled")
+    target_compile_options(agent_native PRIVATE
+        -fprofile-instr-generate
+    )
+    target_link_options(agent_native PRIVATE
+        -fprofile-instr-generate
+    )
+elseif(PGO_USE AND EXISTS "${PGO_PROFILE_PATH}")
+    message(STATUS "  - PGO: Using profile from ${PGO_PROFILE_PATH}")
+    target_compile_options(agent_native PRIVATE
+        -fprofile-instr-use=${PGO_PROFILE_PATH}
+    )
+    target_link_options(agent_native PRIVATE
+        -fprofile-instr-use=${PGO_PROFILE_PATH}
+    )
+endif()
+
+# 链接 Android 库
+target_link_libraries(agent_native PRIVATE
+    ${log-lib}
+)
+
+set_target_properties(agent_native PROPERTIES
+    C_STANDARD 11
+    C_STANDARD_REQUIRED ON
+)
+
+message(STATUS "✓ Agent Core native library configured")

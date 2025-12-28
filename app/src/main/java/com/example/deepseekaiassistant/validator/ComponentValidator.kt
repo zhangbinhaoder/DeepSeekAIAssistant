@@ -682,10 +682,13 @@ object ComponentValidator {
     
     private suspend fun validateAPIConfig(context: Context): ValidationResult {
         return try {
-            val config = com.example.deepseekaiassistant.AIConfigManager.getCurrentConfig(context)
+            // 检查 SharedPreferences 中的 API 配置
+            val prefs = context.getSharedPreferences("deepseek_settings", Context.MODE_PRIVATE)
+            val apiKey = prefs.getString("api_key", "") ?: ""
+            val baseUrl = prefs.getString("base_url", "https://api.deepseek.com") ?: ""
             
-            val hasApiKey = config.apiKey.isNotBlank()
-            val hasBaseUrl = config.baseUrl.isNotBlank()
+            val hasApiKey = apiKey.isNotBlank()
+            val hasBaseUrl = baseUrl.isNotBlank()
             
             if (hasApiKey && hasBaseUrl) {
                 ValidationResult(
@@ -694,7 +697,7 @@ object ComponentValidator {
                     category = ComponentCategory.CONFIG,
                     status = ComponentStatus.OK,
                     message = "Configured",
-                    details = "Model: ${config.model}"
+                    details = "BaseURL: ${baseUrl.take(30)}..."
                 )
             } else {
                 ValidationResult(

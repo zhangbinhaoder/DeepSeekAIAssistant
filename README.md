@@ -1,10 +1,11 @@
 # DeepSeek AI Assistant
 
-一款功能强大的 Android AI 助手应用，支持本地 AI 模型推理、Root 权限控制、多功能浏览器和数学计算模块。
+一款功能强大的 Android AI 助手应用，支持本地 AI 模型推理、Root 权限控制、极致性能优化、位图转矢量图、Termux 集成等多种功能。
 
 ![Platform](https://img.shields.io/badge/Platform-Android-green)
 ![API](https://img.shields.io/badge/API-26%2B-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-blue)
+![Native](https://img.shields.io/badge/Native-C%2FC%2B%2B%2FNEON%2FAsm-orange)
 
 ## 📱 功能特性
 
@@ -32,6 +33,26 @@
 - **函数绘图**：绘制数学函数图像
 - **科学计算**：支持复杂数学运算
 - **步骤展示**：显示计算过程
+
+### 🖼️ 位图转矢量图
+- **多格式输入**：支持 PNG、JPG、BMP、WEBP、GIF、TIFF 等主流位图格式
+- **多格式输出**：支持 SVG、PDF、EPS、DXF 等主流矢量图格式
+- **智能算法**：Potrace 风格轮廓追踪 + Douglas-Peucker 路径简化
+- **实时预览**：左右分栏界面，实时查看转换效果
+- **参数调节**：阈值、简化程度、反转颜色、填充模式
+
+### 🚀 极致性能优化
+- **C 语言核心**：关键算法使用纯 C 实现
+- **ARM NEON SIMD**：图像处理向量化加速
+- **汇编优化**：ARM64 手写汇编优化热点函数
+- **无分支算法**：减少 CPU 分支预测失败
+- **内存预取**：优化缓存命中率
+
+### 📱 Termux 集成
+- **终端访问**：直接访问 Termux 终端
+- **脚本执行**：运行自定义 Shell 脚本
+- **API 调用**：调用 Termux API 功能
+- **X11 支持**：支持 Termux:X11 图形界面
 
 ### 🎨 原神主题 UI
 - **原神配色**：金色 + 天蓝色主题
@@ -180,24 +201,43 @@ DeepSeekAIAssistant/
 │   │   │   ├── RootManager.kt        # Root权限管理
 │   │   │   ├── AIControlCommand.kt   # 控制指令
 │   │   │   └── AIRootController.kt   # 执行控制器
-│   │   └── tools/
-│   │       └── SceneTools.kt         # 玩机工具集
+│   │   ├── tools/
+│   │   │   ├── SceneTools.kt         # 玩机工具集
+│   │   │   ├── VectorizeActivity.kt  # 矢量化界面
+│   │   │   └── VectorizerManager.kt  # 矢量化管理器
+│   │   └── termux/
+│   │       ├── TermuxActivity.kt     # Termux集成界面
+│   │       └── TermuxIntegration.kt  # Termux API调用
 │   ├── cpp/
 │   │   ├── llama.cpp/                # llama.cpp 库
-│   │   ├── llama_android.cpp         # JNI 实现
+│   │   ├── llama_android.cpp         # LLM JNI 实现
+│   │   ├── vectorizer.c              # 矢量化引擎 (C)
+│   │   ├── simd_image.c              # NEON图像处理
+│   │   ├── simd_image_adv.c          # 高级SIMD优化
+│   │   ├── hp_core.c                 # 高性能核心
+│   │   ├── asm_core.S                # ARM64汇编优化
+│   │   ├── ultra_optim.S             # 极致汇编优化
 │   │   └── CMakeLists.txt
 │   └── res/                          # 资源文件
+├── rust_core/                        # Rust高性能模块
+│   └── src/
+│       ├── image_engine.rs           # 图像处理引擎
+│       ├── strategy_engine.rs        # 策略引擎
+│       └── memory_engine.rs          # 内存引擎
 └── build.gradle.kts
 ```
 
 ### 技术栈
 
-- **语言**：Kotlin
+- **语言**：Kotlin + C + ARM Assembly
 - **UI 框架**：Android View + Material Design 3
 - **网络**：Retrofit + OkHttp
 - **本地 AI**：llama.cpp (JNI)
-- **构建**：Gradle Kotlin DSL
+- **图像处理**：NEON SIMD 向量化加速
+- **矢量化引擎**：纯 C 实现的 Potrace 风格算法
+- **构建**：Gradle Kotlin DSL + CMake
 - **最低 API**：Android 8.0 (API 26)
+- **架构**：arm64-v8a
 
 ---
 
@@ -237,6 +277,8 @@ A: 应用已修复 `net::ERR_UNKNOWN_SCHEME` 错误，如仍有问题：
 - [llama.cpp](https://github.com/ggerganov/llama.cpp) - 本地 AI 推理引擎
 - [DeepSeek](https://www.deepseek.com/) - AI 模型与 API
 - [Material Design](https://m3.material.io/) - UI 设计规范
+- [Potrace](http://potrace.sourceforge.net/) - 矢量化算法灵感
+- [Termux](https://termux.dev/) - Android 终端模拟器
 
 ---
 

@@ -18,6 +18,9 @@ import com.example.deepseekaiassistant.local.LocalAIManager
 import com.example.deepseekaiassistant.root.AIRootController
 import com.example.deepseekaiassistant.root.RootManager
 import com.example.deepseekaiassistant.tools.SceneTools
+import com.example.deepseekaiassistant.agent.GameAIAgent
+import com.example.deepseekaiassistant.agent.MultiSceneAIAgent
+import com.example.deepseekaiassistant.agent.OperationType
 import java.io.File
 
 /**
@@ -32,6 +35,15 @@ class SceneFragment : Fragment() {
     private lateinit var localAIManager: LocalAIManager
     private lateinit var rootManager: RootManager
     private lateinit var aiRootController: AIRootController
+    
+    // AI 代执行代理
+    private lateinit var gameAIAgent: GameAIAgent
+    private lateinit var multiSceneAgent: MultiSceneAIAgent
+    private var currentSceneType: SceneType = SceneType.GAME
+    
+    enum class SceneType {
+        GAME, VIDEO, SHOP, FOOD
+    }
     
     // 下载对话框
     private var downloadDialog: AlertDialog? = null
@@ -57,6 +69,7 @@ class SceneFragment : Fragment() {
         setupLocalAI()
         setupModuleManagement()
         setupAIControlPermission()
+        setupAIAgent()
         checkRootStatus()
         loadSystemInfo()
     }
@@ -713,8 +726,183 @@ class SceneFragment : Fragment() {
             .show()
     }
     
+    // ==================== AI 代执行操作 ====================
+    
+    private fun setupAIAgent() {
+        // 初始化 AI 代理
+        gameAIAgent = GameAIAgent(requireContext())
+        multiSceneAgent = MultiSceneAIAgent(requireContext())
+        
+        // 设置游戏 AI 监听器
+        gameAIAgent.setListener(object : GameAIAgent.GameAIListener {
+            override fun onStateChanged(isRunning: Boolean, isPaused: Boolean) {
+                activity?.runOnUiThread {
+                    updateAgentUI(isRunning, isPaused)
+                }
+            }
+            
+            override fun onOperationExecuted(log: GameAIAgent.OperationLogEntry) {
+                activity?.runOnUiThread {
+                    binding.tvAgentStats.text = buildString {
+                        append("最近操作: ${log.description}\n")
+                        append("状态: ${if (log.success) "✅ 成功" else "❌ 失败"}")
+                    }
+                }
+            }
+            
+            override fun onError(message: String) {
+                activity?.runOnUiThread {
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                }
+            }
+            
+            override fun onStats(totalOps: Int, successOps: Int, runningTime: Long) {
+                activity?.runOnUiThread {
+                    val successRate = if (totalOps > 0) (successOps * 100 / totalOps) else 0
+                    val minutes = runningTime / 60000
+                    val seconds = (runningTime % 60000) / 1000
+                    binding.tvAgentStats.text = buildString {
+                        append("操作统计: $totalOps 次 | 成功率: $successRate%\n")
+                        append("运行时间: ${minutes}分${seconds}秒")
+                    }
+                }
+            }
+        })
+        
+        // 场景选择
+        binding.chipGroupScene.setOnCheckedStateChangeListener { _, checkedIds ->
+            if (checkedIds.isNotEmpty()) {
+                when (checkedIds.first()) {
+                    R.id.chipSceneGame -> {
+                        currentSceneType = SceneType.GAME
+                        binding.layoutGameType.visibility = View.VISIBLE
+                    }
+                    R.id.chipSceneVideo -> {
+                        currentSceneType = SceneType.VIDEO
+                        binding.layoutGameType.visibility = View.GONE
+                    }
+                    R.id.chipSceneShop -> {
+                        currentSceneType = SceneType.SHOP
+                        binding.layoutGameType.visibility = View.GONE
+                    }
+                    R.id.chipSceneFood -> {
+                        currentSceneType = SceneType.FOOD
+                        binding.layoutGameType.visibility = View.GONE
+                    }
+                }
+            }
+        }
+        
+        // 游戏类型选择
+        binding.chipGroupGameType.setOnCheckedStateChangeListener { _, checkedIds ->
+            if (checkedIds.isNotEmpty()) {
+                val gameType = when (checkedIds.first()) {
+                    R.id.chipGame2D -> GameAIAgent.GameType.ELIMINATE_2D
+                    R.id.chipGameMOBA -> GameAIAgent.GameType.MOBA_3D
+                    R.id.chipGameFPS -> GameAIAgent.GameType.FPS_3D
+                    R.id.chipGameRPG -> GameAIAgent.GameType.RPG_3D
+                    else -> GameAIAgent.GameType.UNKNOWN
+                }
+                // 配置游戏类型
+                gameAIAgent.configureGame("", gameType)
+            }
+        }
+        
+        // Root 模式开关
+        binding.switchAgentRoot.setOnCheckedChangeListener { _, isChecked ->
+            gameAIAgent.setRootMode(isChecked)
+            if (isChecked && !rootManager.isAppRootAuthorized()) {
+                Toast.makeText(requireContext(), "需要 ROOT 权限", Toast.LENGTH_SHORT).show()
+                binding.switchAgentRoot.isChecked = false
+            }
+        }
+        
+        // 启动按钮
+        binding.btnStartAgent.setOnClickListener {
+            startAIAgent()
+        }
+        
+        // 暂停按钮
+        binding.btnPauseAgent.setOnClickListener {
+            gameAIAgent.togglePause()
+        }
+        
+        // 停止按钮
+        binding.btnStopAgent.setOnClickListener {
+            stopAIAgent()
+        }
+    }
+    
+    private fun startAIAgent() {
+        when (currentSceneType) {
+            SceneType.GAME -> {
+                // 检查是否配置了游戏类型
+                val stats = gameAIAgent.getStats()
+                if (stats["currentStrategy"] == "无") {
+                    Toast.makeText(requireContext(), "请先选择游戏类型", Toast.LENGTH_SHORT).show()
+                    return
+                }
+                gameAIAgent.start()
+            }
+            SceneType.VIDEO -> {
+                val preferences = listOf("宠物", "搞笑", "美食")
+                multiSceneAgent.startShortVideoMode(preferences)
+            }
+            SceneType.SHOP -> {
+                multiSceneAgent.startECommerceMode()
+            }
+            SceneType.FOOD -> {
+                Toast.makeText(requireContext(), "外卖模式需要配置店铺和菜品", Toast.LENGTH_SHORT).show()
+                return
+            }
+        }
+        
+        updateAgentUI(true, false)
+        Toast.makeText(requireContext(), "AI 代理已启动", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun stopAIAgent() {
+        gameAIAgent.stop()
+        multiSceneAgent.stop()
+        updateAgentUI(false, false)
+        Toast.makeText(requireContext(), "AI 代理已停止", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun updateAgentUI(isRunning: Boolean, isPaused: Boolean) {
+        binding.btnStartAgent.isEnabled = !isRunning
+        binding.btnPauseAgent.isEnabled = isRunning
+        binding.btnStopAgent.isEnabled = isRunning
+        
+        binding.btnPauseAgent.text = if (isPaused) "▶ 继续" else "⏸ 暂停"
+        
+        binding.tvAgentStatus.text = when {
+            isRunning && isPaused -> "已暂停"
+            isRunning -> "运行中"
+            else -> "未运行"
+        }
+        
+        binding.tvAgentStatus.setBackgroundColor(when {
+            isRunning && isPaused -> 0x33FFFF00.toInt()
+            isRunning -> 0x3300FF00.toInt()
+            else -> 0x33FF0000.toInt()
+        })
+        
+        binding.tvAgentStatus.setTextColor(when {
+            isRunning && isPaused -> 0xFFFFAA00.toInt()
+            isRunning -> 0xFF00AA00.toInt()
+            else -> 0xFFFF0000.toInt()
+        })
+    }
+    
     override fun onDestroyView() {
         super.onDestroyView()
+        // 释放 AI 代理资源
+        if (::gameAIAgent.isInitialized) {
+            gameAIAgent.release()
+        }
+        if (::multiSceneAgent.isInitialized) {
+            multiSceneAgent.release()
+        }
         _binding = null
     }
     

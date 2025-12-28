@@ -164,6 +164,146 @@
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
+        
+        <!-- Termux 集成 -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="#1a1a2e"
+            app:strokeColor="#2ECC71"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_termux" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:text="🐧 Termux 集成"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#2ECC71" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvTermuxStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="点击进入 Termux 功能区，集成 Termux-API 和 Termux-X11"
+                    android:textSize="13sp"
+                    android:textColor="#AAAAAA" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="• Termux-API: 访问设备硬件和系统功能\n• Termux-X11: 运行图形化 Linux 应用\n• 命令执行: 快速发送命令到 Termux\n• 预置脚本: 常用工具脚本一键执行"
+                    android:textSize="12sp"
+                    android:lineSpacingExtra="2dp"
+                    android:textColor="#888888" />
+
+                <Button
+                    android:id="@+id/btnOpenTermux"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="进入 Termux 功能区"
+                    android:backgroundTint="#2ECC71" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 位图转矢量图工具 -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="#1e1e2e"
+            app:strokeColor="#9B59B6"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🎨"
+                        android:textSize="28sp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:text="位图转矢量图"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#9B59B6" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="将 PNG/JPG/BMP/WEBP 等位图转换为 SVG/PDF/EPS/DXF 矢量图格式"
+                    android:textSize="13sp"
+                    android:textColor="#AAAAAA" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="• 支持主流位图格式: PNG, JPG, BMP, WEBP, GIF\n• 输出矢量图格式: SVG, PDF, EPS, DXF (CAD)\n• 可调节阈值、简化程度、反转颜色\n• 实时预览 + 快速导出"
+                    android:textSize="12sp"
+                    android:lineSpacingExtra="2dp"
+                    android:textColor="#888888" />
+
+                <Button
+                    android:id="@+id/btnOpenVectorize"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="打开矢量化工具"
+                    android:backgroundTint="#9B59B6" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- 性能模式 -->
         <com.google.android.material.card.MaterialCardView

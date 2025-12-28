@@ -61,3 +61,10 @@ Thumbs.db
 
 # Log files
 *.log
+
+# Kotlin IDE files
+.kotlin/
+
+# Large model files
+app/src/main/assets/models/*.gguf
+*.gguf

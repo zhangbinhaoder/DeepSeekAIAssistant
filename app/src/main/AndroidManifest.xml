@@ -125,6 +125,23 @@
             android:exported="false"
             android:parentActivityName=".SettingsActivity" />
         
+        <!-- Termux 集成页 -->
+        <activity
+            android:name=".termux.TermuxActivity"
+            android:exported="false"
+            android:label="Termux 集成"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.DeepSeekAIAssistant" />
+        
+        <!-- 位图转矢量图工具 -->
+        <activity
+            android:name=".tools.VectorizeActivity"
+            android:exported="false"
+            android:label="位图转矢量图"
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.DeepSeekAIAssistant" />
+        
         <!-- 无障碍服务（高级设备控制） -->
         <service
             android:name=".service.AIAccessibilityService"

@@ -22,6 +22,10 @@ import com.example.deepseekaiassistant.agent.GameAIAgent
 import com.example.deepseekaiassistant.agent.MultiSceneAIAgent
 import com.example.deepseekaiassistant.agent.OperationType
 import com.example.deepseekaiassistant.kernel.KernelOptimize
+import com.example.deepseekaiassistant.termux.TermuxActivity
+import com.example.deepseekaiassistant.termux.TermuxIntegration
+import com.example.deepseekaiassistant.tools.VectorizeActivity
+import android.content.Intent
 import java.io.File
 
 /**
@@ -72,6 +76,8 @@ class SceneFragment : Fragment() {
         setupAIControlPermission()
         setupAIAgent()
         setupKernelOptimize()
+        setupTermuxIntegration()
+        setupVectorizeTools()
         checkRootStatus()
         loadSystemInfo()
     }
@@ -332,6 +338,47 @@ class SceneFragment : Fragment() {
             temp < 45 -> 0xFFFF5722.toInt() // 深橙 (过热)
             else -> 0xFFF44336.toInt()      // 红色 (危险)
         }
+    }
+    
+    // ==================== Termux 集成 ====================
+    
+    private fun setupTermuxIntegration() {
+        // 更新 Termux 状态
+        updateTermuxStatus()
+        
+        // 进入 Termux 功能区按钮
+        binding.btnOpenTermux.setOnClickListener {
+            val intent = Intent(requireContext(), TermuxActivity::class.java)
+            startActivity(intent)
+        }
+    }
+    
+    // ==================== 矢量化工具 ====================
+    
+    private fun setupVectorizeTools() {
+        // 打开矢量化工具按钮
+        binding.btnOpenVectorize.setOnClickListener {
+            val intent = Intent(requireContext(), VectorizeActivity::class.java)
+            startActivity(intent)
+        }
+    }
+    
+    private fun updateTermuxStatus() {
+        val status = TermuxIntegration.checkTermuxStatus(requireContext())
+        
+        binding.tvTermuxStatus.text = buildString {
+            if (status.termuxInstalled) {
+                append("✅ Termux 已安装")
+                if (status.apiInstalled) append(" | API ✓")
+                if (status.x11Installed) append(" | X11 ✓")
+            } else {
+                append("⚠️ Termux 未安装 - 点击进入查看安装指南")
+            }
+        }
+        
+        binding.tvTermuxStatus.setTextColor(
+            if (status.termuxInstalled) 0xFF2ECC71.toInt() else 0xFFAAAAAA.toInt()
+        )
     }
     
     // ==================== 本地 AI 模型管理 ====================

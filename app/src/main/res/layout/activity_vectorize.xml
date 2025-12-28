@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_light">
+
+    <!-- 顶部标题栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:background="@color/genshin_gold">
+
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_arrow_back"
+            android:contentDescription="返回"
+            app:tint="@android:color/white" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="位图转矢量图"
+            android:textSize="20sp"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp" />
+
+        <ImageButton
+            android:id="@+id/helpButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_help"
+            android:contentDescription="帮助"
+            app:tint="@android:color/white" />
+    </LinearLayout>
+
+    <!-- 主内容区域 - 左右分栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <!-- 左侧 - 输入区域 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginEnd="4dp">
+
+            <!-- 输入框标题 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📥 输入 (位图)"
+                android:textSize="16sp"
+                android:textColor="@color/genshin_gold"
+                android:textStyle="bold"
+                android:paddingVertical="8dp" />
+
+            <!-- 图片预览框 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+                android:layout_marginBottom="8dp">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#F5F5F5">
+
+                    <ImageView
+                        android:id="@+id/inputImageView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="输入图片" />
+
+                    <!-- 空状态提示 -->
+                    <LinearLayout
+                        android:id="@+id/emptyInputHint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:src="@drawable/ic_image"
+                            android:alpha="0.5"
+                            app:tint="#999999" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="点击导入图片"
+                            android:textColor="#999999"
+                            android:textSize="14sp"
+                            android:layout_marginTop="8dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="支持 PNG/JPG/BMP/WEBP/GIF"
+                            android:textColor="#BBBBBB"
+                            android:textSize="12sp"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+                </FrameLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 导入按钮 -->
+            <Button
+                android:id="@+id/importButton"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="📂 导入图片"
+                android:textSize="14sp"
+                android:background="@drawable/btn_accent"
+                android:textColor="@android:color/white" />
+
+            <!-- 输入信息 -->
+            <TextView
+                android:id="@+id/inputInfoText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="等待导入图片..."
+                android:textSize="12sp"
+                android:textColor="#666666"
+                android:padding="8dp"
+                android:lineSpacingExtra="4dp" />
+        </LinearLayout>
+
+        <!-- 中间 - 参数设置 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingHorizontal="8dp"
+            android:gravity="center_vertical">
+
+            <!-- 阈值设置 -->
+            <TextView
+                android:id="@+id/thresholdLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="阈值: 自动"
+                android:textSize="12sp"
+                android:textColor="#333333" />
+
+            <SeekBar
+                android:id="@+id/thresholdSeekBar"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:max="255"
+                android:progress="0" />
+
+            <!-- 简化设置 -->
+            <TextView
+                android:id="@+id/simplifyLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="简化: 2.0"
+                android:textSize="12sp"
+                android:textColor="#333333"
+                android:layout_marginTop="16dp" />
+
+            <SeekBar
+                android:id="@+id/simplifySeekBar"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="20" />
+
+            <!-- 反转颜色 -->
+            <Switch
+                android:id="@+id/invertSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="反转"
+                android:textSize="12sp"
+                android:layout_marginTop="16dp" />
+
+            <!-- 填充模式 -->
+            <Switch
+                android:id="@+id/fillModeSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="填充"
+                android:textSize="12sp"
+                android:checked="true"
+                android:layout_marginTop="8dp" />
+
+            <!-- 转换按钮 -->
+            <Button
+                android:id="@+id/convertButton"
+                android:layout_width="100dp"
+                android:layout_height="48dp"
+                android:text="▶ 转换"
+                android:textSize="14sp"
+                android:enabled="false"
+                android:background="@drawable/btn_accent"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="24dp" />
+        </LinearLayout>
+
+        <!-- 右侧 - 输出区域 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="4dp">
+
+            <!-- 输出框标题 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingVertical="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="📤 输出 (矢量图)"
+                    android:textSize="16sp"
+                    android:textColor="@color/genshin_gold"
+                    android:textStyle="bold" />
+
+                <!-- 格式选择 -->
+                <Spinner
+                    android:id="@+id/formatSpinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:background="@drawable/spinner_bg"
+                    android:padding="4dp" />
+            </LinearLayout>
+
+            <!-- 矢量图预览 (WebView) -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+                android:layout_marginBottom="8dp">
+
+                <WebView
+                    android:id="@+id/outputPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white" />
+            </androidx.cardview.widget.CardView>
+
+            <!-- 保存按钮 -->
+            <Button
+                android:id="@+id/saveButton"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="💾 保存矢量图"
+                android:textSize="14sp"
+                android:enabled="false"
+                android:background="@drawable/btn_success"
+                android:textColor="@android:color/white" />
+
+            <!-- 输出信息 -->
+            <TextView
+                android:id="@+id/outputInfoText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="等待转换..."
+                android:textSize="12sp"
+                android:textColor="#666666"
+                android:padding="8dp"
+                android:lineSpacingExtra="4dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 底部状态栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="8dp"
+        android:background="#F0F0F0">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:visibility="gone"
+            android:max="100" />
+
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="就绪"
+            android:textSize="12sp"
+            android:textColor="#666666"
+            android:gravity="center" />
+    </LinearLayout>
+
+</LinearLayout>

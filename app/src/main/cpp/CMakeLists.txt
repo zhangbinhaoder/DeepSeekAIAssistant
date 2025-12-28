@@ -157,6 +157,7 @@ message(STATUS "Configuring Agent Core native library...")
 # C 标准
 add_library(agent_native SHARED
     simd_image.c
+    simd_image_adv.c
     touch_inject.c
     precision_timer.c
     screen_memory.c
@@ -164,6 +165,8 @@ add_library(agent_native SHARED
     branchless_optim.c
     benchmark.c
     kernel_optimize.c
+    hp_core.c
+    vectorizer.c
 )
 
 # 包含二进制优化头文件目录
@@ -178,10 +181,21 @@ if(CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a")
     target_sources(agent_native PRIVATE
         asm_core.S
         kernel_syscall.S
+        ultra_optim.S
     )
     
     # 汇编编译选项
     set_source_files_properties(asm_core.S PROPERTIES
+        LANGUAGE ASM
+        COMPILE_FLAGS "-x assembler-with-cpp"
+    )
+    
+    set_source_files_properties(ultra_optim.S PROPERTIES
+        LANGUAGE ASM
+        COMPILE_FLAGS "-x assembler-with-cpp"
+    )
+    
+    set_source_files_properties(kernel_syscall.S PROPERTIES
         LANGUAGE ASM
         COMPILE_FLAGS "-x assembler-with-cpp"
     )

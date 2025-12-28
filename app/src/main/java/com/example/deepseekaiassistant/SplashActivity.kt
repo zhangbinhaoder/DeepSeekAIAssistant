@@ -15,9 +15,10 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.deepseekaiassistant.agent.NativeAgentCore
-import com.example.deepseekaiassistant.agent.KernelOptimizeManager
+import com.example.deepseekaiassistant.kernel.KernelOptimize
 import com.example.deepseekaiassistant.local.LocalAIManager
 import com.example.deepseekaiassistant.root.RootManager
+import com.example.deepseekaiassistant.validator.ComponentValidator
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -237,22 +238,86 @@ class SplashActivity : AppCompatActivity() {
         }
         appendLog("")
         
-        // 自检
-        appendLog("[    0.800000] Running system self-check...")
-        var selfCheckPassed = true
-        withContext(Dispatchers.IO) {
-            try {
-                // 简单检查
-                selfCheckPassed = true
-            } catch (e: Exception) {
-                selfCheckPassed = false
-            }
+        // 组件完整性验证
+        appendLog("[    0.800000] Running component integrity validation...")
+        appendLog("")
+        
+        val validationResult = withContext(Dispatchers.IO) {
+            ComponentValidator.runFullValidation(
+                context = applicationContext,
+                autoFix = true,
+                callback = object : ComponentValidator.ValidationCallback {
+                    override fun onStart(totalComponents: Int) {
+                        scope.launch {
+                            appendLog("[    0.800001] Total components to validate: $totalComponents", 0)
+                        }
+                    }
+                    
+                    override fun onProgress(current: Int, total: Int, result: ComponentValidator.ValidationResult) {
+                        scope.launch {
+                            val offset = (System.currentTimeMillis() - startTime) / 1000.0
+                            val statusStr = when (result.status) {
+                                ComponentValidator.ComponentStatus.OK -> "[  OK  ]"
+                                ComponentValidator.ComponentStatus.WARNING -> "[ WARN ]"
+                                ComponentValidator.ComponentStatus.ERROR -> "[FAILED]"
+                                ComponentValidator.ComponentStatus.FIXED -> "[FIXED ]"
+                                else -> "[  --  ]"
+                            }
+                            appendLog(String.format("[%12.6f] %s %s: %s %s", 
+                                offset, 
+                                result.category.icon,
+                                result.componentName, 
+                                result.message, 
+                                statusStr), 30)
+                        }
+                    }
+                    
+                    override fun onFixing(result: ComponentValidator.ValidationResult) {
+                        scope.launch {
+                            val offset = (System.currentTimeMillis() - startTime) / 1000.0
+                            appendLog(String.format("[%12.6f] Attempting auto-fix: %s...", 
+                                offset, result.componentName), 0)
+                        }
+                    }
+                    
+                    override fun onFixed(result: ComponentValidator.ValidationResult, success: Boolean) {
+                        scope.launch {
+                            val offset = (System.currentTimeMillis() - startTime) / 1000.0
+                            val statusStr = if (success) "[FIXED ]" else "[FAILED]"
+                            appendLog(String.format("[%12.6f] Auto-fix %s: %s %s", 
+                                offset, 
+                                result.componentName,
+                                if (success) "successful" else "failed",
+                                statusStr), 0)
+                        }
+                    }
+                    
+                    override fun onComplete(report: ComponentValidator.ValidationReport) {
+                        scope.launch {
+                            val offset = (System.currentTimeMillis() - startTime) / 1000.0
+                            appendLog("", 0)
+                            appendLog(String.format("[%12.6f] ────────────────────────────────────────", offset), 0)
+                            appendLog(String.format("[%12.6f] Validation complete in %dms", offset, report.duration), 0)
+                            appendLog(String.format("[%12.6f] Results: %d OK, %d WARN, %d ERROR, %d FIXED", 
+                                offset, report.okCount, report.warningCount, report.errorCount, report.fixedCount), 0)
+                            appendLog(String.format("[%12.6f] ────────────────────────────────────────", offset), 0)
+                        }
+                    }
+                    
+                    override fun onLog(message: String) {
+                        // 日志已通过 DiagnosticManager 记录
+                    }
+                }
+            )
         }
         
-        if (selfCheckPassed) {
-            appendLog("[    0.850000] Self-check passed [  OK  ]")
+        appendLog("")
+        if (validationResult.allPassed) {
+            appendLog("[    0.850000] Component validation passed [  OK  ]")
+        } else if (validationResult.fixedCount > 0 && validationResult.errorCount == 0) {
+            appendLog("[    0.850000] Issues auto-fixed [FIXED ]")
         } else {
-            appendLog("[    0.850000] Self-check found issues [WARN]")
+            appendLog("[    0.850000] Validation found issues [WARN]")
         }
         appendLog("")
         

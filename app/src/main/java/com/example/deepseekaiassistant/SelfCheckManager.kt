@@ -658,6 +658,16 @@ object SelfCheckManager {
         }
     }
     
+    // Context 用于组件完整性检查
+    private var checkContext: Context? = null
+    
+    /**
+     * 设置检查使用的 Context
+     */
+    fun setCheckContext(context: Context) {
+        checkContext = context.applicationContext
+    }
+    
     /**
      * 组件完整性验证（简化版）
      */
@@ -665,20 +675,31 @@ object SelfCheckManager {
         val results = mutableListOf<CheckResult>()
         
         try {
-            // 检查 Termux 集成
-            val termuxStatus = com.example.deepseekaiassistant.termux.TermuxIntegration.checkTermuxStatus(android.app.Application())
-            results.add(CheckResult(
-                category = "组件完整性",
-                item = "Termux 集成",
-                status = if (termuxStatus.termuxInstalled) CheckStatus.OK else CheckStatus.WARNING,
-                message = if (termuxStatus.termuxInstalled) {
-                    "Termux 已安装" + 
-                    (if (termuxStatus.apiInstalled) " | API ✓" else "") +
-                    (if (termuxStatus.x11Installed) " | X11 ✓" else "")
-                } else {
-                    "Termux 未安装（可选组件）"
-                }
-            ))
+            // 获取 context，如果没有设置则跳过 Termux 检查
+            val ctx = checkContext
+            if (ctx != null) {
+                // 检查 Termux 集成
+                val termuxStatus = com.example.deepseekaiassistant.termux.TermuxIntegration.checkTermuxStatus(ctx)
+                results.add(CheckResult(
+                    category = "组件完整性",
+                    item = "Termux 集成",
+                    status = if (termuxStatus.termuxInstalled) CheckStatus.OK else CheckStatus.WARNING,
+                    message = if (termuxStatus.termuxInstalled) {
+                        "Termux 已安装" + 
+                        (if (termuxStatus.apiInstalled) " | API ✓" else "") +
+                        (if (termuxStatus.x11Installed) " | X11 ✓" else "")
+                    } else {
+                        "Termux 未安装（可选组件）"
+                    }
+                ))
+            } else {
+                results.add(CheckResult(
+                    category = "组件完整性",
+                    item = "Termux 集成",
+                    status = CheckStatus.WARNING,
+                    message = "无法检查（Context 未设置）"
+                ))
+            }
             
             // 检查内核优化模块
             val kernelLoaded = try {

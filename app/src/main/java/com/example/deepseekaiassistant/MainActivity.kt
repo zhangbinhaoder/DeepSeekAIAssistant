@@ -40,20 +40,31 @@ class MainActivity : AppCompatActivity() {
     }
     
     /**
-     * 执行 APP 自检
+     * 执行 APP 自检 - 延迟执行，避免影响启动
      * 检测各模块状态，自动修复常见问题，错误时弹出提示
      */
     private fun runAppSelfCheck() {
-        SelfCheckManager.runFullCheck(
-            context = this,
-            autoFix = true,
-            showDialog = true  // 有问题时显示对话框
-        ) { report ->
-            if (report.hasErrors) {
-                DiagnosticManager.warning("MainActivity", 
-                    "自检发现 ${report.errorCount} 个错误，${report.autoFixedCount} 个已自动修复")
+        // 延迟 3 秒执行自检，避免影响启动速度
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            try {
+                SelfCheckManager.runFullCheck(
+                    context = this,
+                    autoFix = true,
+                    showDialog = true  // 有问题时显示对话框
+                ) { report ->
+                    try {
+                        if (report.hasErrors) {
+                            DiagnosticManager.warning("MainActivity", 
+                                "自检发现 ${report.errorCount} 个错误，${report.autoFixedCount} 个已自动修复")
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.w("MainActivity", "Self check callback error", e)
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.w("MainActivity", "Self check failed", e)
             }
-        }
+        }, 3000)
     }
 
     private fun setupViewPager() {

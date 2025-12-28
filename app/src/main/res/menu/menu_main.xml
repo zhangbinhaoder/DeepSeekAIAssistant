@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_self_check"
+        android:icon="@drawable/ic_check_circle"
+        android:title="自检"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_export_logs"
+        android:icon="@drawable/ic_save"
+        android:title="导出日志"
+        app:showAsAction="never" />
+
+</menu>

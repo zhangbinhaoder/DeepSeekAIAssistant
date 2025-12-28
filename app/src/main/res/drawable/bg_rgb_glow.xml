@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- RGB 流光边框背景 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 外层流光边框 -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="sweep"
+                android:startColor="#FF5733"
+                android:centerColor="#33FF57"
+                android:endColor="#3357FF" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+    <!-- 内层背景 -->
+    <item
+        android:left="2dp"
+        android:top="2dp"
+        android:right="2dp"
+        android:bottom="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFBF0" />
+            <corners android:radius="14dp" />
+        </shape>
+    </item>
+</layer-list>

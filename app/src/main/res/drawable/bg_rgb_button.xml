@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- RGB 流光按钮背景 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 外层流光边框 -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:angle="45"
+                android:startColor="#FF6B6B"
+                android:centerColor="#4ECDC4"
+                android:endColor="#45B7D1" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+    <!-- 内层背景 -->
+    <item
+        android:left="2dp"
+        android:top="2dp"
+        android:right="2dp"
+        android:bottom="2dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:angle="135"
+                android:startColor="#1a1a2e"
+                android:endColor="#16213e" />
+            <corners android:radius="22dp" />
+        </shape>
+    </item>
+</layer-list>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 原神风格用户气泡 - 金色主题 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:type="linear"
+        android:angle="135"
+        android:startColor="@color/genshin_gold_light"
+        android:endColor="@color/genshin_gold" />
+    <corners
+        android:topLeftRadius="16dp"
+        android:topRightRadius="16dp"
+        android:bottomLeftRadius="16dp"
+        android:bottomRightRadius="4dp" />
+    <stroke
+        android:width="1dp"
+        android:color="@color/genshin_gold_dark" />
+</shape>

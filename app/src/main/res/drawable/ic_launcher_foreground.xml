@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    原神风格图标前景 - 派蒙风格星星
+    
+    如需使用派蒙头像PNG:
+    1. 将派蒙头像命名为 ic_launcher_foreground.png
+    2. 放入 mipmap-xxxhdpi 等目录
+    3. 删除此文件
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- 中心大星 - 派蒙头饰风格 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,28L60,43L76,45L64,56L67,72L54,65L41,72L44,56L32,45L48,43Z" />
+    
+    <!-- 星星内部 -->
+    <path
+        android:fillColor="#FFE082"
+        android:pathData="M54,34L58,44L69,46L60,54L62,65L54,60L46,65L48,54L39,46L50,44Z" />
+    
+    <!-- 中心点 -->
+    <path
+        android:fillColor="#F5C349"
+        android:pathData="M54,44L56,50L62,51L57,55L58,61L54,58L50,61L51,55L46,51L52,50Z" />
+    
+    <!-- 小装饰星 - 左上 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,30L32,34L36,35L33,37L34,41L30,39L26,41L27,37L24,35L28,34Z" />
+    
+    <!-- 小装饰星 - 右上 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M78,30L80,34L84,35L81,37L82,41L78,39L74,41L75,37L72,35L76,34Z" />
+    
+    <!-- 小装饰星 - 左下 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,74L32,78L36,79L33,81L34,85L30,83L26,85L27,81L24,79L28,78Z" />
+    
+    <!-- 小装饰星 - 右下 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M78,74L80,78L84,79L81,81L82,85L78,83L74,85L75,81L72,79L76,78Z" />
+    
+</vector>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ============================================ -->
+    <!-- 原神 Genshin Impact 主题样式 -->
+    <!-- ============================================ -->
+    
+    <!-- 主题 - 原神风格 -->
+    <style name="Theme.DeepSeekAIAssistant" parent="Theme.Material3.Light.NoActionBar">
+        <!-- 原神金色主调 -->
+        <item name="colorPrimary">@color/genshin_gold</item>
+        <item name="colorPrimaryDark">@color/genshin_gold_dark</item>
+        <item name="colorAccent">@color/genshin_sky_blue</item>
+        
+        <!-- Material 3 颜色 -->
+        <item name="colorPrimaryContainer">@color/genshin_gold_light</item>
+        <item name="colorSecondary">@color/genshin_sky_blue</item>
+        <item name="colorSecondaryContainer">@color/genshin_hydro</item>
+        <item name="colorTertiary">@color/genshin_anemo</item>
+        
+        <!-- 原神背景 -->
+        <item name="android:colorBackground">@color/background_light</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceVariant">@color/genshin_gold_light</item>
+        
+        <!-- 原神状态栏样式 -->
+        <item name="android:statusBarColor">@color/genshin_deep_blue</item>
+        <item name="android:navigationBarColor">@color/surface_light</item>
+        <item name="android:windowLightStatusBar">false</item>
+        
+        <!-- 文字颜色 -->
+        <item name="android:textColorPrimary">@color/text_primary_light</item>
+        <item name="android:textColorSecondary">@color/text_secondary_light</item>
+    </style>
+    
+    <!-- 深色主题 - 原神夜晚风格 -->
+    <style name="Theme.DeepSeekAIAssistant.Dark" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/genshin_gold_light</item>
+        <item name="colorPrimaryDark">@color/genshin_gold_dark</item>
+        <item name="colorAccent">@color/genshin_hydro</item>
+        
+        <item name="colorPrimaryContainer">@color/genshin_gold</item>
+        <item name="colorSecondary">@color/genshin_hydro</item>
+        <item name="colorTertiary">@color/genshin_electro</item>
+        
+        <item name="android:colorBackground">@color/background_dark</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        
+        <item name="android:statusBarColor">@color/background_dark</item>
+        <item name="android:navigationBarColor">@color/surface_dark</item>
+        
+        <item name="android:textColorPrimary">@color/text_primary_dark</item>
+        <item name="android:textColorSecondary">@color/text_secondary_dark</item>
+    </style>
+    
+    <!-- 原神对话框样式 - 用户 -->
+    <style name="ChatBubbleUser">
+        <item name="android:background">@drawable/bg_bubble_user</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:textColor">@color/bubble_user_text</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+    
+    <!-- 原神对话框样式 - AI（派蒙） -->
+    <style name="ChatBubbleAI">
+        <item name="android:background">@drawable/bg_bubble_ai</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:textColor">@color/bubble_ai_text_light</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+    
+    <!-- 原神输入框样式 -->
+    <style name="InputEditText" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">20dp</item>
+        <item name="boxCornerRadiusTopEnd">20dp</item>
+        <item name="boxCornerRadiusBottomStart">20dp</item>
+        <item name="boxCornerRadiusBottomEnd">20dp</item>
+        <item name="boxStrokeColor">@color/genshin_gold</item>
+        <item name="hintTextColor">@color/text_secondary_light</item>
+    </style>
+    
+    <!-- 原神发送按钮样式 -->
+    <style name="SendButton" parent="Widget.Material3.Button.Icon">
+        <item name="cornerRadius">20dp</item>
+        <item name="backgroundTint">@color/genshin_gold</item>
+        <item name="iconTint">@color/text_primary_light</item>
+    </style>
+    
+    <!-- 原神卡片样式 -->
+    <style name="GenshinCard" parent="Widget.Material3.CardView.Filled">
+        <item name="cardBackgroundColor">@color/surface_light</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">4dp</item>
+        <item name="strokeColor">@color/genshin_gold_light</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+    
+    <!-- 原神底部导航样式 -->
+    <style name="GenshinBottomNavigation">
+        <item name="android:background">@color/surface_light</item>
+        <item name="itemIconTint">@color/genshin_gold</item>
+        <item name="itemTextColor">@color/text_primary_light</item>
+        <item name="itemRippleColor">@color/genshin_gold_light</item>
+    </style>
+    
+    <!-- 原神元素按钮样式 -->
+    <style name="ElementButton.Anemo" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/genshin_anemo</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+    
+    <style name="ElementButton.Pyro" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/genshin_pyro</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+    
+    <style name="ElementButton.Hydro" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/genshin_hydro</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+    
+    <style name="ElementButton.Electro" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/genshin_electro</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+    
+    <style name="ElementButton.Geo" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/genshin_geo</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+    
+    <style name="ElementButton.Dendro" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/genshin_dendro</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+    
+    <style name="ElementButton.Cryo" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/genshin_cryo</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+</resources>

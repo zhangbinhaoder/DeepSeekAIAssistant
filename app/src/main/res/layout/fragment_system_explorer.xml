@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_light">
+
+    <!-- 标题栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📊 底层探测器"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary_light" />
+
+        <ImageButton
+            android:id="@+id/btnRefresh"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/stat_notify_sync"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="刷新"
+            app:tint="@color/deepseek_primary" />
+
+        <ImageButton
+            android:id="@+id/btnCopy"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_copy"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="复制"
+            app:tint="@color/deepseek_primary" />
+
+    </LinearLayout>
+
+    <!-- 分类按钮 -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:paddingHorizontal="8dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingVertical="8dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDevice"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="设备"
+                android:textSize="12sp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button.TonalButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCpu"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="CPU"
+                android:textSize="12sp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button.TonalButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMemory"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="内存"
+                android:textSize="12sp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button.TonalButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnStorage"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="存储"
+                android:textSize="12sp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button.TonalButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnBattery"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="电池"
+                android:textSize="12sp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button.TonalButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDisplay"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="显示"
+                android:textSize="12sp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button.TonalButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnNetwork"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="网络"
+                android:textSize="12sp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button.TonalButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSensors"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="传感器"
+                android:textSize="12sp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button.TonalButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnBuild"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Build"
+                android:textSize="12sp"
+                android:layout_marginEnd="4dp"
+                style="@style/Widget.Material3.Button.TonalButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnKernel"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="内核"
+                android:textSize="12sp"
+                style="@style/Widget.Material3.Button.TonalButton" />
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+    <!-- 内容显示区域 -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/tvContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:textSize="13sp"
+            android:textColor="@color/text_primary_light"
+            android:lineSpacingExtra="4dp"
+            android:textIsSelectable="true"
+            android:background="#F5F5F5"
+            android:padding="12dp"
+            android:text="点击上方按钮查看系统信息..." />
+
+    </ScrollView>
+
+</LinearLayout>

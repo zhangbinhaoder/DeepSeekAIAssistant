@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AI 模型选项 -->
+    <string-array name="model_entries">
+        <item>DeepSeek Chat</item>
+        <item>DeepSeek Coder</item>
+        <item>DeepSeek V3</item>
+    </string-array>
+    <string-array name="model_values">
+        <item>deepseek-chat</item>
+        <item>deepseek-coder</item>
+        <item>deepseek-v3</item>
+    </string-array>
+    
+    <!-- 主题选项 -->
+    <string-array name="theme_entries">
+        <item>跟随系统</item>
+        <item>浅色模式</item>
+        <item>深色模式</item>
+    </string-array>
+    <string-array name="theme_values">
+        <item>system</item>
+        <item>light</item>
+        <item>dark</item>
+    </string-array>
+</resources>

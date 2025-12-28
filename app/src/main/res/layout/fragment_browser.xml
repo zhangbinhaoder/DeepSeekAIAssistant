@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light">
+
+    <LinearLayout
+        android:id="@+id/browserContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- 标题栏 -->
+        <LinearLayout
+            android:id="@+id/toolbarContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:background="@color/deepseek_primary"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="浏览器"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:layout_marginStart="8dp" />
+
+            <!-- 书签按钮 -->
+            <ImageButton
+                android:id="@+id/btnBookmark"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_bookmark"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="书签"
+                app:tint="@android:color/white" />
+
+            <!-- 标签页按钮 -->
+            <FrameLayout
+                android:id="@+id/btnTabs"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless">
+                
+                <View
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_tab_count" />
+                    
+                <TextView
+                    android:id="@+id/tvTabCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="1"
+                    android:textColor="@android:color/white"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+
+            <!-- 更多菜单 -->
+            <ImageButton
+                android:id="@+id/btnMenu"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_more_vert"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="菜单"
+                app:tint="@android:color/white" />
+
+        </LinearLayout>
+
+        <!-- 地址栏 -->
+        <LinearLayout
+            android:id="@+id/urlBarContainer"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:background="@color/surface_light">
+
+            <!-- 安全图标 -->
+            <ImageView
+                android:id="@+id/ivSecure"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_lock"
+                app:tint="@color/success"
+                android:layout_marginEnd="4dp"
+                android:visibility="gone" />
+
+            <EditText
+                android:id="@+id/etUrl"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_input_field"
+                android:hint="输入网址或搜索"
+                android:imeOptions="actionGo"
+                android:inputType="textUri"
+                android:paddingHorizontal="12dp"
+                android:singleLine="true"
+                android:textSize="14sp" />
+
+            <!-- 清除/刷新按钮 -->
+            <ImageButton
+                android:id="@+id/btnClearOrRefresh"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@android:drawable/stat_notify_sync"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="刷新"
+                app:tint="@color/deepseek_primary" />
+
+        </LinearLayout>
+
+        <!-- 进度条 -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:max="100"
+            android:progressTint="@color/deepseek_primary"
+            android:visibility="gone" />
+
+        <!-- 快捷入口 -->
+        <HorizontalScrollView
+            android:id="@+id/quickLinksContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:background="@color/surface_light">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupQuickLinks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                app:singleLine="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipBilibili"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="哔哩哔哩"
+                    app:chipIcon="@drawable/ic_video"
+                    app:chipIconTint="@color/primary_color"
+                    style="@style/Widget.Material3.Chip.Suggestion" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipBaidu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="百度"
+                    style="@style/Widget.Material3.Chip.Suggestion" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipGoogle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Google"
+                    style="@style/Widget.Material3.Chip.Suggestion" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipYoutube"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="YouTube"
+                    app:chipIcon="@drawable/ic_video"
+                    app:chipIconTint="@color/error"
+                    style="@style/Widget.Material3.Chip.Suggestion" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipWeibo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="微博"
+                    style="@style/Widget.Material3.Chip.Suggestion" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipZhihu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="知乎"
+                    style="@style/Widget.Material3.Chip.Suggestion" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipTaobao"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="淘宝"
+                    style="@style/Widget.Material3.Chip.Suggestion" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipJd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="京东"
+                    style="@style/Widget.Material3.Chip.Suggestion" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipGithub"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="GitHub"
+                    style="@style/Widget.Material3.Chip.Suggestion" />
+
+            </com.google.android.material.chip.ChipGroup>
+
+        </HorizontalScrollView>
+
+        <!-- WebView -->
+        <FrameLayout
+            android:id="@+id/webViewContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+            
+            <WebView
+                android:id="@+id/webView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+                
+            <!-- 加载覆盖层 -->
+            <LinearLayout
+                android:id="@+id/loadingOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@color/background_light"
+                android:visibility="gone">
+                
+                <ProgressBar
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:indeterminateTint="@color/primary_color" />
+                    
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="加载中..."
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginTop="16dp" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- 底部导航栏 -->
+        <LinearLayout
+            android:id="@+id/bottomNavBar"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:orientation="horizontal"
+            android:background="@color/surface_light"
+            android:elevation="8dp">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@drawable/ic_arrow_back"
+                android:background="?attr/selectableItemBackground"
+                android:contentDescription="后退"
+                app:tint="@color/text_primary" />
+
+            <ImageButton
+                android:id="@+id/btnForward"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@drawable/ic_arrow_forward"
+                android:background="?attr/selectableItemBackground"
+                android:contentDescription="前进"
+                app:tint="@color/text_primary" />
+
+            <ImageButton
+                android:id="@+id/btnHome"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@drawable/ic_home"
+                android:background="?attr/selectableItemBackground"
+                android:contentDescription="主页"
+                app:tint="@color/text_primary" />
+
+            <ImageButton
+                android:id="@+id/btnHistory"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@drawable/ic_history"
+                android:background="?attr/selectableItemBackground"
+                android:contentDescription="历史"
+                app:tint="@color/text_primary" />
+
+            <ImageButton
+                android:id="@+id/btnShare"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@drawable/ic_share"
+                android:background="?attr/selectableItemBackground"
+                android:contentDescription="分享"
+                app:tint="@color/text_primary" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- 全屏视频容器 -->
+    <FrameLayout
+        android:id="@+id/fullscreenContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:visibility="gone" />
+
+</FrameLayout>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="4dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:orientation="horizontal"
+        android:maxWidth="320dp">
+
+        <!-- AI 头像 -->
+        <ImageView
+            android:id="@+id/ivAvatar"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_launcher_foreground"
+            android:background="@color/deepseek_primary"
+            android:padding="4dp"
+            android:contentDescription="AI" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 消息内容 -->
+            <TextView
+                android:id="@+id/tvAiMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_bubble_ai"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:textColor="@color/bubble_ai_text_light"
+                android:textSize="15sp"
+                android:lineSpacingExtra="4dp"
+                android:textIsSelectable="true"
+                tools:text="这是 AI 回复的消息示例，支持 Markdown 渲染" />
+
+            <!-- 操作按钮栏 -->
+            <LinearLayout
+                android:id="@+id/llActions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageButton
+                    android:id="@+id/btnCopy"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_copy"
+                    android:contentDescription="复制"
+                    app:tint="@color/text_secondary_light"
+                    xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+                <ImageButton
+                    android:id="@+id/btnShare"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_share"
+                    android:contentDescription="分享"
+                    app:tint="@color/text_secondary_light"
+                    xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+            </LinearLayout>
+
+            <!-- 时间 -->
+            <TextView
+                android:id="@+id/tvTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginStart="8dp"
+                android:textColor="@color/text_secondary_light"
+                android:textSize="11sp"
+                android:visibility="gone"
+                tools:text="12:31" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

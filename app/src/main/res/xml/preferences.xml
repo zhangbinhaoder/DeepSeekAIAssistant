@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="AI 提供商"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            android:key="ai_provider"
+            android:title="选择 AI 提供商"
+            android:summary="点击选择 DeepSeek、Kimi、OpenAI 等"
+            app:iconSpaceReserved="false" />
+
+        <EditTextPreference
+            android:key="api_key"
+            android:title="API Key"
+            android:summary="点击输入当前提供商的 API Key"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="ai_model"
+            android:title="选择模型"
+            android:summary="点击选择 AI 模型"
+            app:iconSpaceReserved="false" />
+
+        <EditTextPreference
+            android:key="custom_base_url"
+            android:title="自定义 API 地址"
+            android:summary="输入 OpenAI 兼容的 API Base URL"
+            android:visibility="gone"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="api_diagnostic"
+            android:title="🔧 API 诊断"
+            android:summary="测试 API 连接、查看实时日志"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="设备控制"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            android:key="permissions"
+            android:title="@string/settings_permissions"
+            android:summary="@string/settings_permissions_summary"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="accessibility"
+            android:title="@string/settings_accessibility"
+            android:summary="@string/settings_accessibility_summary"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="外观"
+        app:iconSpaceReserved="false">
+
+        <ListPreference
+            android:key="theme"
+            android:title="@string/settings_theme"
+            android:entries="@array/theme_entries"
+            android:entryValues="@array/theme_values"
+            android:defaultValue="system"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="其他"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            android:key="about"
+            android:title="@string/settings_about"
+            android:summary="AI 助手 v2.0.0 - 支持多提供商"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

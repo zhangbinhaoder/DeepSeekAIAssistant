@@ -59,9 +59,16 @@ asm_fast_rsqrt:
 .global asm_fast_sqrt
 .type asm_fast_sqrt, %function
 asm_fast_sqrt:
+    // 保存 LR 和帧指针，因为要调用其他函数
+    stp     x29, x30, [sp, #-16]!
+    mov     x29, sp
+    
     fmov    s1, s0              // 保存 x
     bl      asm_fast_rsqrt      // s0 = rsqrt(x)
     fmul    s0, s0, s1          // s0 = x * rsqrt(x) = sqrt(x)
+    
+    // 恢复 LR 和帧指针
+    ldp     x29, x30, [sp], #16
     ret
 .size asm_fast_sqrt, .-asm_fast_sqrt
 

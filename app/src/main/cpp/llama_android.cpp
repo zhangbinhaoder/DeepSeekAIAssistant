@@ -644,19 +644,27 @@ Java_com_example_deepseekaiassistant_local_LlamaCpp_nativeGenerate(JNIEnv* env, 
         } cleanup_guard;
 
         try {
-            std::lock_guard<std::mutex> lock(g_llama_state.mutex);
-            // 跳过锁保护的判断：已在前置校验中确认资源有效
-            if (!g_llama_state.ctx) {
-                callOnError("Llama context is null");
-                return;
-            }
-
-            // 清理 KV 缓存，为新会话做准备
-            llama_memory_t mem = llama_get_memory(g_llama_state.ctx);
-            if (mem) {
-                llama_memory_clear(mem, false);
-                LOGD("KV cache cleared successfully");
-            }
+            // ===== 关键修复: 将锁的范围缩小到仅保护必要的资源访问 =====
+            // 保存必要的局部变量，避免整个生成过程持有锁
+            llama_context* local_ctx = nullptr;
+            const llama_vocab* local_vocab = nullptr;
+            
+            {
+                std::lock_guard<std::mutex> lock(g_llama_state.mutex);
+                if (!g_llama_state.ctx || !g_llama_state.vocab) {
+                    callOnError("Llama context or vocab is null");
+                    return;
+                }
+                local_ctx = g_llama_state.ctx;
+                local_vocab = g_llama_state.vocab;
+                
+                // 清理 KV 缓存，为新会话做准备
+                llama_memory_t mem = llama_get_memory(local_ctx);
+                if (mem) {
+                    llama_memory_clear(mem, false);
+                    LOGD("KV cache cleared successfully");
+                }
+            } // 锁在此处释放，后续操作不需要锁
 
             // 创建采样器（RAII 管理，自动释放）
             SamplerGuard sampler = create_sampler(temp);
@@ -667,7 +675,7 @@ Java_com_example_deepseekaiassistant_local_LlamaCpp_nativeGenerate(JNIEnv* env, 
 
             // Tokenize prompt（先获取 token 数量，再分配内存）
             const int n_prompt_tokens = -llama_tokenize(
-                g_llama_state.vocab,
+                local_vocab,
                 prompt_str.c_str(),
                 prompt_str.length(),
                 nullptr,
@@ -682,7 +690,7 @@ Java_com_example_deepseekaiassistant_local_LlamaCpp_nativeGenerate(JNIEnv* env, 
 
             std::vector<llama_token> prompt_tokens(n_prompt_tokens);
             const int actual_tokens = llama_tokenize(
-                g_llama_state.vocab,
+                local_vocab,
                 prompt_str.c_str(),
                 prompt_str.length(),
                 prompt_tokens.data(),
@@ -699,7 +707,7 @@ Java_com_example_deepseekaiassistant_local_LlamaCpp_nativeGenerate(JNIEnv* env, 
             LOGD("Tokenized prompt: %d tokens (requested %d)", actual_tokens, n_prompt_tokens);
 
             // 检查上下文长度是否足够
-            const int n_ctx = llama_n_ctx(g_llama_state.ctx);
+            const int n_ctx = llama_n_ctx(local_ctx);
             if (actual_tokens + max_tok > n_ctx) {
                 LOGW("Prompt (%d tokens) + max_tokens (%d) exceeds context size (%d), may truncate",
                      actual_tokens, max_tok, n_ctx);
@@ -707,7 +715,7 @@ Java_com_example_deepseekaiassistant_local_LlamaCpp_nativeGenerate(JNIEnv* env, 
 
             // 评估 prompt（使用 RAII 管理 batch，自动释放）
             LlamaBatchGuard batch_guard(llama_batch_get_one(prompt_tokens.data(), actual_tokens));
-            if (llama_decode(g_llama_state.ctx, batch_guard.get()) != 0) {
+            if (llama_decode(local_ctx, batch_guard.get()) != 0) {
                 callOnError("Failed to evaluate prompt via llama_decode");
                 return;
             }
@@ -720,19 +728,19 @@ Java_com_example_deepseekaiassistant_local_LlamaCpp_nativeGenerate(JNIEnv* env, 
                 // 采样下一个 token
                 const llama_token new_token_id = llama_sampler_sample(
                     sampler.get(),
-                    g_llama_state.ctx,
+                    local_ctx,
                     -1
                 );
 
                 // 检查结束 token
-                if (llama_vocab_is_eog(g_llama_state.vocab, new_token_id)) {
+                if (llama_vocab_is_eog(local_vocab, new_token_id)) {
                     LOGD("End of generation token received, stopping generation");
                     break;
                 }
 
                 // 转换 token 为文本
                 const int token_len = llama_token_to_piece(
-                    g_llama_state.vocab,
+                    local_vocab,
                     new_token_id,
                     token_buf,
                     sizeof(token_buf),
@@ -740,9 +748,11 @@ Java_com_example_deepseekaiassistant_local_LlamaCpp_nativeGenerate(JNIEnv* env, 
                     true
                 );
 
-                if (token_len > 0 && token_len < sizeof(token_buf)) {
+                if (token_len > 0 && token_len < (int)sizeof(token_buf)) {
                     std::string token_str(token_buf, token_len);
                     response += token_str;
+                    
+                    // ===== 关键: 回调时不持有任何锁 =====
                     callOnToken(token_str.c_str());
 
                     // 重置缓冲区
@@ -756,13 +766,15 @@ Java_com_example_deepseekaiassistant_local_LlamaCpp_nativeGenerate(JNIEnv* env, 
                 // 评估新 token - 需要非 const 指针
                 llama_token token_to_decode = new_token_id;
                 llama_batch next_batch = llama_batch_get_one(&token_to_decode, 1);
-                if (llama_decode(g_llama_state.ctx, next_batch) != 0) {
+                if (llama_decode(local_ctx, next_batch) != 0) {
                     LOGW("Failed to decode token %d, stopping generation", i);
                     break;
                 }
             }
 
             LOGI("Generation complete: %d tokens generated (max %d)", generated_count, max_tok);
+            
+            // ===== 关键: 回调时不持有任何锁 =====
             callOnComplete(response.c_str());
 
         } catch (const std::exception& e) {

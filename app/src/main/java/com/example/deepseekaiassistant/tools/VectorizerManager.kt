@@ -155,21 +155,25 @@ class VectorizerManager private constructor(private val context: Context) {
         val width = bitmap.width
         val height = bitmap.height
         
-        val pixels = extractPixelData(bitmap)
-        
-        if (nativeLoaded) {
-            val result = nativeAnalyze(pixels, width, height)
-            if (result != null && result.size >= 3) {
-                return AnalysisResult(
-                    width = width,
-                    height = height,
-                    autoThreshold = result[0],
-                    blackPixelCount = result[1],
-                    whitePixelCount = result[2],
-                    blackRatio = result[1].toFloat() / (width * height),
-                    estimatedPathCount = estimatePathCount(result[1], width, height)
-                )
+        try {
+            val pixels = extractPixelData(bitmap)
+            
+            if (nativeLoaded && pixels != null) {
+                val result = nativeAnalyze(pixels, width, height)
+                if (result != null && result.size >= 3) {
+                    return AnalysisResult(
+                        width = width,
+                        height = height,
+                        autoThreshold = result[0],
+                        blackPixelCount = result[1],
+                        whitePixelCount = result[2],
+                        blackRatio = result[1].toFloat() / (width * height),
+                        estimatedPathCount = estimatePathCount(result[1], width, height)
+                    )
+                }
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "[VECTORIZER] Native analyze failed: ${e.message}")
         }
         
         // Java 回退实现
@@ -254,17 +258,26 @@ class VectorizerManager private constructor(private val context: Context) {
         callback: ProgressCallback? = null
     ): VectorizeResult = withContext(Dispatchers.Default) {
         val startTime = System.currentTimeMillis()
+        var tempBitmap: Bitmap? = null  // 用于追踪需要回收的临时bitmap
         
         try {
             callback?.onProgress("准备图像数据...", 10)
             
             val processBitmap = if (params.invertColors) {
-                invertBitmap(bitmap)
+                invertBitmap(bitmap).also { tempBitmap = it }
             } else {
                 bitmap
             }
             
+            if (processBitmap == null) {
+                throw Exception("Failed to process bitmap: memory allocation failed")
+            }
+            
             val pixels = extractPixelData(processBitmap)
+            if (pixels.isEmpty()) {
+                throw Exception("Failed to extract pixel data")
+            }
+            
             val width = processBitmap.width
             val height = processBitmap.height
             
@@ -315,7 +328,7 @@ class VectorizerManager private constructor(private val context: Context) {
             result
             
         } catch (e: Exception) {
-            Log.e(TAG, "[VECTORIZER] Vectorization failed: ${e.message}")
+            Log.e(TAG, "[VECTORIZER] Vectorization failed: ${e.message}", e)
             val result = VectorizeResult(
                 success = false,
                 errorMessage = e.message ?: "Unknown error",
@@ -323,6 +336,13 @@ class VectorizerManager private constructor(private val context: Context) {
             )
             callback?.onError(e.message ?: "Unknown error")
             result
+        } finally {
+            // 回收临时创建的bitmap，避免内存泄漏
+            tempBitmap?.let {
+                if (!it.isRecycled) {
+                    it.recycle()
+                }
+            }
         }
     }
     
@@ -683,39 +703,85 @@ EOF
     private fun extractPixelData(bitmap: Bitmap): ByteArray {
         val width = bitmap.width
         val height = bitmap.height
-        val buffer = ByteBuffer.allocate(width * height * 4)
         
-        // 确保是 ARGB_8888 格式
-        val argbBitmap = if (bitmap.config != Bitmap.Config.ARGB_8888) {
-            bitmap.copy(Bitmap.Config.ARGB_8888, false)
-        } else {
-            bitmap
+        // 验证bitmap有效性
+        if (width <= 0 || height <= 0 || bitmap.isRecycled) {
+            Log.e(TAG, "[VECTORIZER] Invalid bitmap: width=$width, height=$height, recycled=${bitmap.isRecycled}")
+            return ByteArray(0)
         }
         
-        argbBitmap.copyPixelsToBuffer(buffer)
-        return buffer.array()
+        var copiedBitmap: Bitmap? = null
+        
+        try {
+            // 确保是 ARGB_8888 格式
+            val argbBitmap: Bitmap = if (bitmap.config != Bitmap.Config.ARGB_8888) {
+                val copied = bitmap.copy(Bitmap.Config.ARGB_8888, false)
+                if (copied == null) {
+                    Log.e(TAG, "[VECTORIZER] Failed to copy bitmap to ARGB_8888 format")
+                    return ByteArray(0)
+                }
+                copiedBitmap = copied
+                copied
+            } else {
+                bitmap
+            }
+            
+            val buffer = ByteBuffer.allocate(width * height * 4)
+            argbBitmap.copyPixelsToBuffer(buffer)
+            return buffer.array()
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "[VECTORIZER] Failed to extract pixels: ${e.message}", e)
+            return ByteArray(0)
+        } finally {
+            // 如果创建了副本，用完后回收
+            copiedBitmap?.let {
+                if (!it.isRecycled) {
+                    it.recycle()
+                }
+            }
+        }
     }
     
     /**
      * 反转位图颜色
      */
-    private fun invertBitmap(source: Bitmap): Bitmap {
-        val result = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
-        
-        for (y in 0 until source.height) {
-            for (x in 0 until source.width) {
-                val pixel = source.getPixel(x, y)
-                val inverted = Color.argb(
+    private fun invertBitmap(source: Bitmap): Bitmap? {
+        return try {
+            if (source.isRecycled) {
+                Log.e(TAG, "[VECTORIZER] Cannot invert recycled bitmap")
+                return null
+            }
+            
+            val result = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
+            if (result == null) {
+                Log.e(TAG, "[VECTORIZER] Failed to create bitmap for inversion")
+                return null
+            }
+            
+            // 使用批量像素操作提高效率
+            val width = source.width
+            val height = source.height
+            val pixels = IntArray(width * height)
+            source.getPixels(pixels, 0, width, 0, 0, width, height)
+            
+            for (i in pixels.indices) {
+                val pixel = pixels[i]
+                pixels[i] = Color.argb(
                     Color.alpha(pixel),
                     255 - Color.red(pixel),
                     255 - Color.green(pixel),
                     255 - Color.blue(pixel)
                 )
-                result.setPixel(x, y, inverted)
             }
+            
+            result.setPixels(pixels, 0, width, 0, 0, width, height)
+            result
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "[VECTORIZER] Failed to invert bitmap: ${e.message}", e)
+            null
         }
-        
-        return result
     }
     
     /**
